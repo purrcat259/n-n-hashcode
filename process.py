@@ -1,5 +1,7 @@
 from input import ExampleInput, SmallInput, MediumInput, BigInput
-
+from models.slice import Slice
+from copy import deepcopy
+from pprint import pprint
 from output import Output
 
 
@@ -14,31 +16,39 @@ class Process:
         self.data = input_data.data
         self.slices = []
 
-    def grow_slice(self, slice):
-        while self._is_below_minimum_ingredients(slice) and not self.is_too_big(slice) and not self.overlap_exists(slice);
-            c_slice = slice.growCol(self.data)
-            if slice_is_valid(c_slice):
-                self.slices.append(slice)
+    def run(self, iterations=1000):
+        current_top_left = [0, 0]
+        for i in range(iterations):
+            print('{}/{}'.format(i, iterations))
+            # Initialise a slice
+            slice = Slice(self.data, current_top_left)
+            # grow a slice
+            self.grow_valid_slice(slice)
+            self.print()
+
+    def grow_valid_slice(self, slice):
+        print('Growing valid slice')
+        while self.is_below_minimum_ingredients(slice) and not self.is_too_big(slice) and not self.overlap_exists(slice):
+            r_slice = deepcopy(slice)
+            # C_SLICE
+            slice.growCol(self.data)
+            if self.slice_is_valid(slice):
+                self.add_slice(slice)
                 return
-            else:
-            r_slice = slice.growRow(self.data)
-            if slice_is_valid(r_slice):
+            r_slice.growRow(self.data)
+            if self.slice_is_valid(r_slice):
+                self.add_slice(slice)
+                return
+            slice.growRow(self.data)
+            if self.slice_is_valid(r_slice):
+                self.add_slice(r_slice)
+                return
 
-            else:
-                b_slice = r_slice.growCol(self.data)
-
-
-        if slice_is_valid(slice):
-            self.slices.append(slice)
+    def add_slice(self, slice):
+        self.slices.append(slice)
 
     def slice_is_valid(self, slice):
-<<<<<<< HEAD
-        return not self.is_below_minimum_ingredients(slice) and
-           not self.is_too_big(slice) and
-           not self.overlap_exists(slice)
-=======
         return self.is_below_minimum_ingredients(slice) and not self.is_too_big(slice) and not self.overlap_exists(slice)
->>>>>>> 363387ced82ceab1d63eb5f9b329d69bc06139f5
 
     def overlap_exists(self, slice):
         br_sl_row = slice.top_left[0] + slice.rows - 1
@@ -63,6 +73,23 @@ class Process:
     def is_too_big(self, slice):
         return slice.size() <= self.max_cells
 
+    def print(self):
+        pizza = []
+        for row in range(0, self.pizza_rows):
+            row_list = []
+            for col in range(0, self.pizza_cols):
+                row_list.append('X')
+            pizza.append(row_list)
+        for i in range(0, len(self.slices)):
+            slice = self.slices[i]
+            for row in range(slice.top_left[0], slice.top_left[0] + slice.rows):
+                for col in range(slice.top_left[1], slice.top_left[1] + slice.columns):
+                    pizza[row][col] = str(i)
+        pprint(pizza)
+
 
 if __name__ == '__main__':
-    pass
+    example_input = ExampleInput()
+    example_input.read_file()
+    p = Process(example_input)
+    p.run()
