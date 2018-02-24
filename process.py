@@ -15,8 +15,25 @@ class Process:
         self.data = input_data.data
         self.slices = []
 
+    def grow_slice(self, slice):
+        while self._is_below_minimum_ingredients(slice) and not self.is_too_big(slice) and not self.overlap_exists(slice);
+            c_slice = slice.growCol(self.data)
+            if slice_is_valid(c_slice):
+                self.slices.append(slice)
+                return
+            else:
+            r_slice = slice.growRow(self.data)
+            if slice_is_valid(r_slice):
+
+            else:
+                b_slice = r_slice.growCol(self.data)
+
+
+        if slice_is_valid(slice):
+            self.slices.append(slice)
+
     def slice_is_valid(self, slice):
-        return self.is_below_minimum_ingredients(slice) and
+        return not self.is_below_minimum_ingredients(slice) and
            not self.is_too_big(slice) and
            not self.overlap_exists(slice)
 
