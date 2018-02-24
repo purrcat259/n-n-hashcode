@@ -1,4 +1,5 @@
-from input import Input
+from input import ExampleInput, SmallInput, MediumInput, BigInput
+
 from output import Output
 
 
