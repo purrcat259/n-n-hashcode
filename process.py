@@ -2,40 +2,27 @@ from input import ExampleInput, SmallInput, MediumInput, BigInput
 
 from output import Output
 
+from slice import Slice
 
 class Process:
-    def main(self, rows, columns, minIng, maxCells, data):
-        self.max_cells = maxCells
-        self.pizza_rows = rows
-        self.pizza_cols = columns
+    def __init__(self, input_data):
+        self.max_cells = input_data.maximum_cells
+        self.min_ing = input_data.minimum_ingredient
 
-    def sliceIt(leftPnt):
-        m = 0
-        t = 0
+        self.pizza_rows = input_data.rows
+        self.pizza_cols = input_data.columns
 
-    def grow(slice, dir):
-        if(dir == 0):
-            t_row = slice.top_left[0] + slice.rows + 1
-            r_col = slice.top_left[1] + slice.cols
+        self.data = input_data.data
+        self.slices = []
 
-            for cell_col in range(top_left[1], r_col)
-                addIngredient(slice, data[t_row][cell_col])        
-        else if(dir == 1):
-            br_row = slice.top_left[0] + slice.rows
-            t_col = slice.top_left[1] + slice.cols + 1
+        self.init()
 
-            for cell_row in range(top_left[0], br_row)
-                addIngredient(slice, data[cell_row][t_col])
+    def init(self):
+        self.slices.append(Slice([0,0]))    
 
-        return slice
+    
 
-    def addIngredient(slice,ing):
-        if(ing == "M"):
-            slice.addMushroom(1)
-        else if(ing == "T")
-            slice.addTomato(1)    
-
-    def validateSlice(slice, slices):
+    def validateSlice(self, slice, slices):
         
 
 
