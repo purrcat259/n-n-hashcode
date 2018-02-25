@@ -17,29 +17,48 @@ class Process:
         self.slices = []
 
     def run(self, iterations=1000):
+        print('Maximum Slice Size: ', self.max_cells)
+        print('Minimum Ingredient Count: ', self.min_ing)
+        print('Pizza Size: {} by {}'.format(self.pizza_rows, self.pizza_cols))
         positions_stack = [(0, 0)]
         i = 0
         while not len(positions_stack) == 0:
             i += 1
-            top_left = positions_stack.pop(-1)
+            top_left = positions_stack.pop()
             print('{}/{}'.format(i, iterations))
             # Initialise a slice
             print('Starting from: {}'.format(top_left))
             slice = Slice(self.data, top_left)
             # grow a slice
             was_valid = self.grow_valid_slice(slice)
-            # self.print()
+            self.print()
             if was_valid:
+                print('Added slice from: {},{} with {} rows and {} columns'.format(slice.top_left[0], slice.top_left[1], slice.rows, slice.columns))
                 # add new possible starting positions
                 max_new_bottom = slice.top_left[0] + slice.rows
                 max_new_right = slice.top_left[1] + slice.columns
-                if max_new_bottom <= self.pizza_rows and max_new_right <= self.pizza_cols:
-                    positions_stack.append((max_new_bottom, max_new_right))
-                if max_new_bottom <= self.pizza_rows:
-                    positions_stack.append((max_new_bottom, slice.top_left[1]))
-                if max_new_right <= self.pizza_cols:
+                if max_new_right < self.pizza_cols:
                     positions_stack.append((slice.top_left[0], max_new_right))
+                elif max_new_bottom < self.pizza_rows:
+                    positions_stack.append((max_new_bottom, slice.top_left[1]))
+                elif max_new_bottom < self.pizza_rows and max_new_right < self.pizza_cols:
+                    positions_stack.append((max_new_bottom, max_new_right))
                 print('Stack Size: {}'.format(len(positions_stack)))
+            else:
+                print('Slice: {},{} with {} rows and {} columns was not valid'.format(slice.top_left[0], slice.top_left[1], slice.rows, slice.columns))
+                # Try just to the left
+                new_top_left = (top_left[0], top_left[1] + 1)
+                # if it is invalid, keep searching
+                while self.is_out_of_bounds(new_top_left[0], new_top_left[1]):
+                    print('Searching for new valid start position')
+                    # if we fall off the right side...
+                    if new_top_left[1] >= self.pizza_cols:
+                        # go down to the start of the next row
+                        new_top_left = (new_top_left[0] + 1, 0)
+                positions_stack.append(new_top_left)
+
+    def is_out_of_bounds(self, r, c):
+        return c >= self.pizza_cols or r >= self.pizza_rows
 
 
     def grow_valid_slice(self, slice):
@@ -49,24 +68,25 @@ class Process:
             # C_SLICE
             beyond_column_limits = slice.top_left[1] + slice.columns >= self.pizza_cols
             if not beyond_column_limits:
-                print('Growing by Column')
+                print('COL.', end='')
                 slice.growCol(self.data)
                 if self.slice_is_valid(slice):
                     self.add_slice(slice)
                     return True
             beyond_row_limits = r_slice.top_left[0] + r_slice.rows >= self.pizza_rows
             if not beyond_row_limits:
-                print('Growing by row')
+                print('ROW.', end='')
                 r_slice.growRow(self.data)
                 if self.slice_is_valid(r_slice):
                     self.add_slice(r_slice)
                     return True
             if not beyond_column_limits and not beyond_row_limits:
-                print('Growing by both')
+                print('BOTH.', end='')
                 slice.growRow(self.data)
                 if self.slice_is_valid(slice):
                     self.add_slice(slice)
                     return True
+        print()
         return False
 
     def slice_can_grow(self, slice):
@@ -125,11 +145,14 @@ class Process:
 
 
 if __name__ == '__main__':
-    example_input = ExampleInput()
-    medium_input = MediumInput()
+    # example_input = ExampleInput()
     # example_input.read_file()
-    medium_input.read_file()
     # p = Process(example_input)
-    p = Process(medium_input)
+    small_input = SmallInput()
+    small_input.read_file()
+    p = Process(small_input)
+    # medium_input = MediumInput()
+    # medium_input.read_file()
+    # p = Process(medium_input)
     p.run()
 
