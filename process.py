@@ -34,32 +34,34 @@ class Process:
             self.print()
             if was_valid:
                 print('Added slice from: {},{} with {} rows and {} columns'.format(slice.top_left[0], slice.top_left[1], slice.rows, slice.columns))
-                # add new possible starting positions
-                max_new_bottom = slice.top_left[0] + slice.rows
-                max_new_right = slice.top_left[1] + slice.columns
-                if max_new_right < self.pizza_cols:
-                    positions_stack.append((slice.top_left[0], max_new_right))
-                elif max_new_bottom < self.pizza_rows:
-                    positions_stack.append((max_new_bottom, slice.top_left[1]))
-                elif max_new_bottom < self.pizza_rows and max_new_right < self.pizza_cols:
-                    positions_stack.append((max_new_bottom, max_new_right))
-                print('Stack Size: {}'.format(len(positions_stack)))
+                # Search for a new starting position
+                # Try just to the left
+                new_top_left = (slice.top_left[0] + slice.rows - 1, slice.top_left[1] + slice.columns - 1 + 1)
+                # if it is invalid, keep searching
+                if self.is_out_of_bounds(new_top_left[0], new_top_left[1]):
+                    self.search_for_new_starting_position(new_top_left)
+                positions_stack.append(new_top_left)
             else:
                 print('Slice: {},{} with {} rows and {} columns was not valid'.format(slice.top_left[0], slice.top_left[1], slice.rows, slice.columns))
-                # Try just to the left
-                new_top_left = (top_left[0], top_left[1] + 1)
+                new_top_left = (slice.top_left[0] + slice.rows - 1, slice.top_left[1] + slice.columns - 1 + 1)
                 # if it is invalid, keep searching
-                while self.is_out_of_bounds(new_top_left[0], new_top_left[1]):
-                    print('Searching for new valid start position')
-                    # if we fall off the right side...
-                    if new_top_left[1] >= self.pizza_cols:
-                        # go down to the start of the next row
-                        new_top_left = (new_top_left[0] + 1, 0)
+                if self.is_out_of_bounds(new_top_left[0], new_top_left[1]):
+                    self.search_for_new_starting_position(new_top_left)
                 positions_stack.append(new_top_left)
+
+    def search_for_new_starting_position(self, top_left):
+        new_top_left = (top_left[0], top_left[1])
+        # if it is invalid, keep searching
+        while self.is_out_of_bounds(new_top_left[0], new_top_left[1]):
+            print('Searching for new valid start position')
+            # if we fall off the right side...
+            if new_top_left[1] >= self.pizza_cols:
+                # go down to the start of the next row
+                new_top_left = (new_top_left[0] + 1, 0)
+        return new_top_left
 
     def is_out_of_bounds(self, r, c):
         return c >= self.pizza_cols or r >= self.pizza_rows
-
 
     def grow_valid_slice(self, slice):
         print('Attempting to grow valid slice')
@@ -148,11 +150,11 @@ if __name__ == '__main__':
     # example_input = ExampleInput()
     # example_input.read_file()
     # p = Process(example_input)
-    small_input = SmallInput()
-    small_input.read_file()
-    p = Process(small_input)
-    # medium_input = MediumInput()
-    # medium_input.read_file()
-    # p = Process(medium_input)
+    # small_input = SmallInput()
+    # small_input.read_file()
+    # p = Process(small_input)
+    medium_input = MediumInput()
+    medium_input.read_file()
+    p = Process(medium_input)
     p.run()
 
