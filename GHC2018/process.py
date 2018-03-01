@@ -13,11 +13,6 @@ class Process:
         self.current_time = 0
         # self.get_routes()
 
-    def run(self):
-        self.initialise_cars()
-        self.cars = []
-        self.rides = self.input_data.rides
-
     def initialise_cars(self):
         cars = []
         for i in range(0, self.input_data.vehicle_count):
@@ -31,6 +26,7 @@ class Process:
 
     def run(self):
         self.initialise_cars()
+        self.rides = self.input_data.rides
         sim_range = range(0, self.input_data.sim_steps)
         if not self.debug:
             sim_range = tqdm(sim_range)
@@ -137,7 +133,7 @@ class Process:
             if not t_route is route:
                 wait = t_route.ordered_rides[0].earliest_start -route.ordered_rides[-1].latest_finish
                 if wait >= 0:
-                    route.next_routes.append({'route':t_route, 'wait_time': wait}) 
+                    route.next_routes.append({'route':t_route, 'wait_time': wait})
 
     def get_routes(self):
         routes = []
@@ -203,9 +199,9 @@ if __name__ == '__main__':
     file_names = [
         'a_example.in',
         'b_should_be_easy.in',
-        'c_no_hurry.in',
-        'd_metropolis.in',
-        'e_high_bonus.in'
+        # 'c_no_hurry.in',
+        # 'd_metropolis.in',
+        # 'e_high_bonus.in'
     ]
     for file_name in file_names:
         print('Running: {}\n'.format(file_name))
