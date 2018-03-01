@@ -18,22 +18,6 @@ class Process:
     def get_unassigned_rides(self):
         return [ride for ride in self.input_data.rides if ride.assigned_car == -1]
 
-    def structure_routes(self, routes):
-        routes_list = []
-        for route in routes:
-            self.set_next_routes(route, routes)
-            routes.next_routes = sorted(routes.next_routes, key=lambda k: k['wait_time'], reverse=True)
-
-        for route in routes:
-            next_route = None
-            while next_route is None and len(route.next_routes) > 0:
-                temp_route = route.next_routes.pop()
-                if(temp_route.assigned is False):
-                    next_route = temp_route
-
-            if added is False:
-                new_routes.append([route])
-            
     def set_next_routes(self, route, routes):
         for t_route in routes:
             if not t_route is route:
@@ -77,7 +61,7 @@ class Process:
             end_ride = route.ordered_rides[-1]
 
             if start_ride is next_ride:
-                route.ordered_rides.insert(0, next_ride)
+                route.ordered_rides.insert(0, ride)
                 return routes
             elif end_ride is ride:
                 route.ordered_rides.insert(-1, next_ride)
@@ -102,7 +86,7 @@ class Process:
 
 
 if __name__ == '__main__':
-    example_input = Input(filename='b_should_be_easy.in')
+    example_input = Input(filename='c_no_hurry.in')
     example_input.read_file()
     p = Process(example_input)
     p.run()
