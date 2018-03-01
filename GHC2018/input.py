@@ -8,11 +8,6 @@ class Input:
     def __init__(self, filename):
         self._filename = filename
         self._file_path = os.path.join(current_directory, 'data', self._filename)
-        self._data = []
-        self._rows = 0
-        self._columns = 0
-        self._minimum_ingredient = 0
-        self._maximum_cells = 0
 
     def read_file(self):
         with open(self._file_path, 'r') as input_file:
@@ -68,16 +63,4 @@ class BigInput(Input):
 if __name__ == '__main__':
     input_parser = Input(filename='example.in')
     input_parser.read_file()
-    assert 3 == input_parser.rows
-    assert 5 == input_parser.columns
-    assert 1 == input_parser.minimum_ingredient
-    assert 6 == input_parser.maximum_cells
-    print(input_parser.data)
-    example_input = ExampleInput()
-    example_input.read_file()
-    assert 3 == example_input.rows
-    assert 5 == example_input.columns
-    assert 1 == example_input.minimum_ingredient
-    assert 6 == example_input.maximum_cells
-    print(example_input.data)
-    assert input_parser.data == example_input.data
+
