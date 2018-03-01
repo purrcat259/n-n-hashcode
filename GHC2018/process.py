@@ -89,10 +89,7 @@ class Process:
         for car in unassigned_cars:
             # next_ride = unassigned_rides.pop(0)
             unassigned_rides = self.get_unassigned_rides()
-            next_possible_rides = self.get_next_ride(car, unassigned_rides, self.current_time)
-            if len(next_possible_rides) == 0:
-                return
-            next_ride = next_possible_rides[0]
+            next_ride = self.get_next_ride(car, unassigned_rides, self.current_time)
             rides_for_route = [next_ride]
             route = Route(rides_for_route)
             self.debug_print('Assigned route with ride IDs {} to car: {}'.format(
