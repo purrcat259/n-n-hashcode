@@ -88,18 +88,12 @@ class Process:
             return
         for car in unassigned_cars:
             # next_ride = unassigned_rides.pop(0)
+
             next_possible_rides = self.get_next_possible_rides(car, self.current_time)
             if len(next_possible_rides) == 0:
                 return
             next_ride = next_possible_rides[0]
             rides_for_route = [next_ride]
-            # if not len(unassigned_rides) == 0:
-            #     closest_next_rides = self.get_next_possible_rides(next_ride, self.current_time)
-            #     if len(closest_next_rides) > 0:
-            #         closest_next_ride = closest_next_rides[0]
-            #         self.debug_print('Closest ride to {} is {}'.format(next_ride.ride_id, closest_next_ride.ride_id))
-            #         unassigned_rides.pop(unassigned_rides.index(closest_next_ride))
-            #         rides_for_route.append(closest_next_ride)
             route = Route(rides_for_route)
             self.debug_print('Assigned route with ride IDs {} to car: {}'.format(
                 route.get_route_ride_ids(),
@@ -138,35 +132,6 @@ class Process:
                 wait = t_route.ordered_rides[0].earliest_start -route.ordered_rides[-1].latest_finish
                 if wait >= 0:
                     route.next_routes.append({'route':t_route, 'wait_time': wait})
-
-    # def get_routes(self):
-    #     routes = []
-    #     rides_closests = []
-    #
-    #     for ride in self.input_data.rides:
-    #         rides = self.get_next_possible_rides(ride, ride.earliest_start)
-    #         rides_closests.append({'ride': ride, 'rides': rides})
-    #
-    #     rides_closests = sorted(rides_closests, key=lambda k: len(k['rides']), reverse=True)
-    #     print(rides_closests)
-    #     for ride_closest in rides_closests:
-    #         last_ride = None
-    #         while last_ride is None and len(ride_closest['rides']) > 0:
-    #             temp_ride = ride_closest['rides'].pop()
-    #             if(temp_ride.assigned_car is None):
-    #                 last_ride = temp_ride
-    #         if not last_ride is None:
-    #             last_ride.assigned_car = 1
-    #             ride_closest['ride'].assigned_car = 1
-    #             routes = self.add_to_route(ride_closest['ride'], last_ride, routes)
-    #
-    #     print(len(routes))
-    #     for route in routes:
-    #         print(len(route.ordered_rides), end=":")
-    #         for ordered_ride in route.ordered_rides:
-    #             print(ordered_ride.ride_id, end=",")
-    #         print()
-    #     print(routes[0].ordered_rides)
 
     def add_to_route(self, ride, next_ride, routes):
         for route in routes:
