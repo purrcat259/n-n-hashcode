@@ -8,11 +8,11 @@ current_directory = os.path.dirname(os.path.realpath(__file__))
 class Input:
     def __init__(self, filename):
         self._filename = filename
-        self._file_path = os.path.join(current_directory, 'data', self._filename)
+        self.file_path = os.path.join(current_directory, 'data', self._filename)
         self.rides = []
 
     def read_file(self):
-        with open(self._file_path, 'r') as input_file:
+        with open(self.file_path, 'r') as input_file:
             data = input_file.readlines()
             # first line is the parameters so pop it off
             params = data.pop(0).replace('\n', '').split(' ')
