@@ -41,7 +41,10 @@ class Process:
             # move any cars
             self.move_cars()
         self.debug_print('SIMULATION ENDED')
-        self.debug_print('{} rides left unfinished'.format(len(self.rides) - len(self.get_completed_rides())))
+        print('{} rides completed. {} rides left unfinished'.format(
+            len(self.get_completed_rides()),
+            len(self.rides) - len(self.get_completed_rides()))
+        )
         self.output_file()
 
     def output_file(self):
