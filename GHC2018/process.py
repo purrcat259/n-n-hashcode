@@ -88,8 +88,8 @@ class Process:
             return
         for car in unassigned_cars:
             # next_ride = unassigned_rides.pop(0)
-
-            next_possible_rides = self.get_next_possible_rides(car, self.current_time)
+            unassigned_rides = self.get_unassigned_rides()
+            next_possible_rides = self.get_next_possible_rides(car, self.current_time, unassigned_rides)
             if len(next_possible_rides) == 0:
                 return
             next_ride = next_possible_rides[0]
@@ -148,9 +148,8 @@ class Process:
         routes.append(Route([ride, next_ride]))
         return routes
 
-    def get_next_possible_rides(self, car, actual_start_time):
+    def get_next_possible_rides(self, car, actual_start_time, unassigned_rides):
         # unassigned_rides = deepcopy(self.get_unassigned_rides())
-        unassigned_rides = self.get_unassigned_rides()
         possible_best_rides = []
         for unassigned_ride in unassigned_rides:
             distance_to_next_ride = calculate_distance(car.row, unassigned_ride.row_start, car.col, unassigned_ride.col_start)
