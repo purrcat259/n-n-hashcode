@@ -149,9 +149,9 @@ if __name__ == '__main__':
     file_names = [
         'a_example.in',
         'b_should_be_easy.in',
-        # 'c_no_hurry.in',
+        'c_no_hurry.in',
         'd_metropolis.in',
-        # 'e_high_bonus.in'
+        'e_high_bonus.in'
     ]
     for file_name in file_names:
         print('Running: {}\n'.format(file_name))
