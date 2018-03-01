@@ -89,7 +89,7 @@ class Process:
         for car in unassigned_cars:
             # next_ride = unassigned_rides.pop(0)
             unassigned_rides = self.get_unassigned_rides()
-            next_possible_rides = self.get_next_possible_rides(car, self.current_time, unassigned_rides)
+            next_possible_rides = self.get_next_ride(car, unassigned_rides, self.current_time)
             if len(next_possible_rides) == 0:
                 return
             next_ride = next_possible_rides[0]
@@ -148,16 +148,19 @@ class Process:
         routes.append(Route([ride, next_ride]))
         return routes
 
-    def get_next_possible_rides(self, car, actual_start_time, unassigned_rides):
+    def get_next_ride(self, car, rides, actual_start_time):
         # unassigned_rides = deepcopy(self.get_unassigned_rides())
-        possible_best_rides = []
-        for unassigned_ride in unassigned_rides:
+        best_ride = None
+        waiting = 0 
+        for unassigned_ride in rides:
             distance_to_next_ride = calculate_distance(car.row, unassigned_ride.row_start, car.col, unassigned_ride.col_start)
             time_to_new_start = actual_start_time + distance_to_next_ride
-            if time_to_new_start >= unassigned_ride.earliest_start:
-                if time_to_new_start + unassigned_ride.distance <= unassigned_ride.latest_finish:
-                    possible_best_rides.append(unassigned_ride)
-        return possible_best_rides
+            if time_to_new_start + unassigned_ride.distance <= unassigned_ride.latest_finish:
+                temp_waiting = max(unassigned_ride.earliest_start - (time_to_new_start + unassigned_ride.distance), 0)
+                if best_ride is None or waiting > temp_waiting:
+                    waiting = temp_waiting
+                    best_ride = unassigned_ride
+        return best_ride
 
 
 if __name__ == '__main__':
