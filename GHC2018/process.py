@@ -87,7 +87,8 @@ class Process:
         if len(unassigned_rides) == 0:
             return
         for car in unassigned_cars:
-            next_ride = unassigned_rides.pop(0)
+            # next_ride = unassigned_rides.pop(0)
+            next_ride = self.get_closest_ride_to_car(car, unassigned_rides)
             rides_for_route = [next_ride]
             if not len(unassigned_rides) == 0:
                 closest_next_rides = self.get_next_closest_rides(next_ride, self.current_time)
@@ -102,6 +103,17 @@ class Process:
                 car.car_id
             ))
             car.assign_route(route)
+
+    def get_closest_ride_to_car(self, car, rides):
+        closest_ride = rides[0]
+        closest_distance = calculate_distance(car.row, closest_ride.row_start, car.col, closest_ride.col_start)
+        for i in range(1, len(rides)):
+            ride = rides[i]
+            next_closest_distance = calculate_distance(car.row, ride.row_start, car.col, ride.col_start)
+            if next_closest_distance < closest_distance:
+                closest_ride = ride
+                closest_distance = next_closest_distance
+        return rides.pop(rides.index(closest_ride))
 
     def move_cars(self):
         for car in self.get_assigned_cars():
@@ -135,11 +147,11 @@ class Process:
 
 if __name__ == '__main__':
     file_names = [
-        # 'a_example.in',
-        # 'b_should_be_easy.in',
-        'c_no_hurry.in',
+        'a_example.in',
+        'b_should_be_easy.in',
+        # 'c_no_hurry.in',
         'd_metropolis.in',
-        'e_high_bonus.in'
+        # 'e_high_bonus.in'
     ]
     for file_name in file_names:
         print('Running: {}\n'.format(file_name))
