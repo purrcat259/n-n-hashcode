@@ -1,9 +1,9 @@
-from GHC2018.input import ExampleInput, MediumInput, SmallInput, BigInput
+from GHC2018.input import Input
 from GHC2018.models.Car import Car
 from GHC2018.models.Route import Route
 from GHC2018.models.ride import calculate_distance
 
-from copy import deepcopy
+from tqdm import tqdm
 
 
 class Process:
@@ -28,8 +28,11 @@ class Process:
 
     def run(self):
         self.initialise_cars()
-        for i in range(0, self.input_data.sim_steps):
-            print('--- STEP {} ---'.format(i))
+        sim_range = range(0, self.input_data.sim_steps)
+        if not self.debug:
+            sim_range = tqdm(sim_range)
+        for i in sim_range:
+            self.debug_print('--- STEP {}/{} ---'.format(i, self.input_data.sim_steps))
             self.current_time = i
             # if cars are at their destination, end the ride
             self.end_rides()
@@ -37,6 +40,24 @@ class Process:
             self.schedule_rides()
             # move any cars
             self.move_cars()
+        self.debug_print('SIMULATION ENDED')
+        self.debug_print('{} rides left unfinished'.format(len(self.rides) - len(self.get_completed_rides())))
+        self.output_file()
+
+    def output_file(self):
+        output_file_path = self.input_data.file_path.replace('.in', '.out')
+        car_rides = {}
+        for ride in self.get_completed_rides():
+            if ride.assigned_car in car_rides.keys():
+                car_rides[ride.assigned_car].append(ride.ride_id)
+            else:
+                car_rides[ride.assigned_car] = [ride.ride_id]
+        with open(output_file_path, 'w') as output_file:
+            for car, rides in car_rides.items():
+                output_string = str(len(rides))
+                for ride_id in rides:
+                    output_string += ' {}'.format(ride_id)
+                output_file.write(output_string + '\n')
 
     def end_rides(self):
         self.debug_print('Checking if cars have arrived')
@@ -45,8 +66,10 @@ class Process:
         ]
         self.debug_print('{} cars completed their ride this turn'.format(len(completed_cars)))
         for car in completed_cars:
-            car.complete()
-            car.assigned_ride.complete()
+            self.debug_print('Car {} has completed their ride'.format(car.car_id))
+            car.complete_ride()
+            if car.assigned_route_completed():
+                car.complete_route()
             self.debug_print('{}/{} rides completed'.format(
                 len(self.get_completed_rides()),
                 len(self.rides)
@@ -58,14 +81,18 @@ class Process:
     def schedule_rides(self):
         unassigned_cars = self.get_unassigned_cars()
         unassigned_rides = self.get_unassigned_rides()
+        if len(unassigned_rides) == 0:
+            return
         for car in unassigned_cars:
             next_ride = unassigned_rides.pop(0)
             rides_for_route = [next_ride]
             if not len(unassigned_rides) == 0:
-                closest_next_ride = self.get_next_closest_rides(next_ride, self.current_time)[0]
-                self.debug_print('Closest ride to {} is {}'.format(next_ride.ride_id, closest_next_ride.ride_id))
-                unassigned_rides.pop(unassigned_rides.index(closest_next_ride))
-                rides_for_route.append(closest_next_ride)
+                closest_next_rides = self.get_next_closest_rides(next_ride, self.current_time)
+                if len(closest_next_rides) > 0:
+                    closest_next_ride = closest_next_rides[0]
+                    self.debug_print('Closest ride to {} is {}'.format(next_ride.ride_id, closest_next_ride.ride_id))
+                    unassigned_rides.pop(unassigned_rides.index(closest_next_ride))
+                    rides_for_route.append(closest_next_ride)
             route = Route(rides_for_route)
             self.debug_print('Assigned route with ride IDs {} to car: {}'.format(
                 route.get_route_ride_ids(),
@@ -92,7 +119,7 @@ class Process:
         unassigned_rides = self.get_unassigned_rides()
         possible_best_rides = []
         for unassigned_ride in unassigned_rides:
-            if ride == unassigned_rides:
+            if ride.ride_id == unassigned_ride.ride_id:
                 continue
             distance_to_next_ride = calculate_distance(ride.row_end, unassigned_ride.row_start, ride.col_end, unassigned_ride.col_start)
             full_distance = distance_to_next_ride + ride.distance
@@ -104,23 +131,16 @@ class Process:
 
 
 if __name__ == '__main__':
-    example_input = ExampleInput()
-    example_input.read_file()
-    p = Process(example_input)
-    p.run()
-    #
-    # small_input = SmallInput()
-    # small_input.read_file()
-    # p = Process(small_input)
-    # p.run()
-    #
-    # medium_input = MediumInput()
-    # medium_input.read_file()
-    # p = Process(medium_input)
-    # p.run()
-    #
-    # big_input = BigInput()
-    # big_input.read_file()
-    # p = Process(big_input)
-    # p.run()
-    #
+    file_names = [
+        # 'a_example.in',
+        # 'b_should_be_easy.in',
+        'c_no_hurry.in',
+        'd_metropolis.in',
+        'e_high_bonus.in'
+    ]
+    for file_name in file_names:
+        print('Running: {}\n'.format(file_name))
+        input_parser = Input(file_name)
+        input_parser.read_file()
+        p = Process(input_data=input_parser, debug=False)
+        p.run()

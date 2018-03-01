@@ -2,3 +2,5 @@
 tests/.cache
 .vs/
 __pycache__/
+*.out
+*.zip

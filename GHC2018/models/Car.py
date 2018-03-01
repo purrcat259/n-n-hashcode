@@ -19,11 +19,42 @@ class Car:
         return self.row == self.assigned_ride.row_end and self.col == self.assigned_ride.col_end
 
     def complete_ride(self):
-        self.assigned_ride = None
+        self.assigned_ride.complete()
+        # Get rid of the completed one
+        self.assigned_route.ordered_rides.pop()
+        # get the next one if one exists
+        if len(self.assigned_route.ordered_rides) > 0:
+            self.assigned_ride = self.assigned_route.ordered_rides[0]
 
     def complete_route(self):
         self.assigned_route = None
 
+    def assigned_route_completed(self):
+        return len(self.assigned_route.ordered_rides) == 0
+
     def move_towards_destination(self):
-        # TODO
-        pass
+        target_row, target_col = self.assigned_ride.row_end, self.assigned_ride.col_end
+        if target_row > self.row:
+            self.move_down()
+        elif target_row < self.row:
+            self.move_up()
+        elif target_col > self.col:
+            self.move_right()
+        else:
+            self.move_left()
+
+    def move_up(self):
+        # print('Car {} moving UP'.format(self.car_id))
+        self.row -= 1
+
+    def move_down(self):
+        # print('Car {} moving DOWN'.format(self.car_id))
+        self.row += 1
+
+    def move_right(self):
+        # print('Car {} moving RIGHT'.format(self.car_id))
+        self.col += 1
+
+    def move_left(self):
+        # print('Car {} moving LEFT'.format(self.car_id))
+        self.row -= 1
