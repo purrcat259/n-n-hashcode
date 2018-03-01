@@ -14,7 +14,7 @@ class Ride:
         self.latest_finish = latest_finish
         self.col_start = col_start
         self.row_start = row_start
-        self.assigned_car = -1  # -1 means unassigned
+        self.assigned_car = None  # -1 means unassigned
         self.max_duration = self.latest_finish - self.earliest_start
         self.distance = calculate_distance(self.row_start, self.row_end, self.col_start, self.col_end)
 

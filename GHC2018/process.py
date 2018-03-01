@@ -1,5 +1,6 @@
-from GHC2018.input import ExampleInput, MediumInput, SmallInput, BigInput
-from GHC2018.models.ride import calculate_distance
+from input import Input, ExampleInput, MediumInput, SmallInput, BigInput
+from models.ride import calculate_distance
+from models.Route import Route
 
 from copy import deepcopy
 
@@ -8,19 +9,85 @@ class Process:
     def __init__(self, input_data):
         self.input_data = input_data
         self.current_time = 0
+        self.get_routes()
 
     def run(self):
         for i in range(0 , self.input_data.sim_steps):
-            print('--- STEP {} ---'.format(i))
             self.current_time = i
 
     def get_unassigned_rides(self):
         return [ride for ride in self.input_data.rides if ride.assigned_car == -1]
 
-    
+    def structure_routes(self, routes):
+        routes_list = []
+        for route in routes:
+            self.set_next_routes(route, routes)
+            routes.next_routes = sorted(routes.next_routes, key=lambda k: k['wait_time'], reverse=True)
+
+        for route in routes:
+            next_route = None
+            while next_route is None and len(route.next_routes) > 0:
+                temp_route = route.next_routes.pop()
+                if(temp_route.assigned is False):
+                    next_route = temp_route
+
+            if added is False:
+                new_routes.append([route])
+            
+    def set_next_routes(self, route, routes):
+        for t_route in routes:
+            if not t_route is route:
+                wait = t_route.ordered_rides[0].earliest_start -route.ordered_rides[-1].latest_finish
+                if wait >= 0:
+                    route.next_routes.append({'route':t_route, 'wait_time': wait}) 
+            
+
+    def get_routes(self):
+        routes = []
+        rides_closests = []
+
+        for ride in self.input_data.rides:
+            rides = self.get_next_closest_rides(ride, ride.earliest_start)
+            rides_closests.append({'ride': ride, 'rides': rides})
+
+        rides_closests = sorted(rides_closests, key=lambda k: len(k['rides']), reverse=True)
+        print(rides_closests)
+        for ride_closest in rides_closests:
+            last_ride = None
+            while last_ride is None and len(ride_closest['rides']) > 0:
+                temp_ride = ride_closest['rides'].pop()
+                if(temp_ride.assigned_car is None):
+                    last_ride = temp_ride
+            if not last_ride is None:
+                last_ride.assigned_car = 1
+                ride_closest['ride'].assigned_car = 1
+                routes = self.add_to_route(ride_closest['ride'], last_ride, routes)
+        
+        print(len(routes))
+        for route in routes:
+            print(len(route.ordered_rides), end=":")
+            for ordered_ride in route.ordered_rides:
+                print(ordered_ride.ride_id, end=",")
+            print()
+        print(routes[0].ordered_rides)
+
+    def add_to_route(self, ride, next_ride, routes):
+        for route in routes:
+            start_ride = route.ordered_rides[0]
+            end_ride = route.ordered_rides[-1]
+
+            if start_ride is next_ride:
+                route.ordered_rides.insert(0, next_ride)
+                return routes
+            elif end_ride is ride:
+                route.ordered_rides.insert(-1, next_ride)
+                return routes
+
+        routes.append(Route([ride, next_ride]))
+        return routes
 
     def get_next_closest_rides(self, ride, actual_start_time):
-        unassigned_rides = deepcopy(self.get_unassigned_rides())
+        unassigned_rides = self.input_data.rides
         possible_best_rides = []
         for unassigned_ride in unassigned_rides:
             if ride == unassigned_rides:
@@ -35,7 +102,7 @@ class Process:
 
 
 if __name__ == '__main__':
-    example_input = ExampleInput()
+    example_input = Input(filename='b_should_be_easy.in')
     example_input.read_file()
     p = Process(example_input)
     p.run()
