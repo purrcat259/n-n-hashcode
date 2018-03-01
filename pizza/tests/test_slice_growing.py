@@ -1,6 +1,6 @@
-from input import ExampleInput
+from pizza.input import ExampleInput
 
-from models.slice import Slice
+from pizza.models.slice import Slice
 
 """
 TTTTT

@@ -1,8 +1,7 @@
-from input import ExampleInput, SmallInput, MediumInput, BigInput
-from models.slice import Slice
 from copy import deepcopy
-from pprint import pprint
-from output import Output
+
+from pizza.input import ExampleInput, MediumInput
+from pizza.models.slice import Slice
 
 
 class Process:

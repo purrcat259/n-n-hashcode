@@ -1,7 +1,7 @@
-from process import Process
 from input import ExampleInput
-from models.slice import Slice
 
+from pizza.models.slice import Slice
+from pizza.process import Process
 
 """
 TTTTT
