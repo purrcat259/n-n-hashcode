@@ -17,6 +17,11 @@ class Ride:
         self.assigned_car = -1  # -1 means unassigned
         self.max_duration = self.latest_finish - self.earliest_start
         self.distance = calculate_distance(self.row_start, self.row_end, self.col_start, self.col_end)
+        self.completed = False
 
+    def __str__(self):
+        return 'ID: {}, Car: {}'.format(self.ride_id, self.assigned_car)
 
+    def complete(self):
+        self.completed = True
 
