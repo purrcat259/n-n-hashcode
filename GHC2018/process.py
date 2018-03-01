@@ -40,7 +40,7 @@ class Process:
             # move any cars
             self.move_cars()
         self.debug_print('SIMULATION ENDED')
-        print('{} rides completed. {} rides left unfinished'.format(
+        print('{} rides completed. {} rides left unfinished.'.format(
             len(self.get_completed_rides()),
             len(self.rides) - len(self.get_completed_rides()))
         )
@@ -157,6 +157,8 @@ class Process:
                 if best_ride is None or waiting > temp_waiting:
                     waiting = temp_waiting
                     best_ride = unassigned_ride
+                if waiting == 0:
+                    return best_ride
         return best_ride
 
 
