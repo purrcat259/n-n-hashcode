@@ -11,9 +11,7 @@ class Process:
         self.input_data = input_data
         self.debug = debug
         self.current_time = 0
-        self.initialise_cars()
-        self.cars = []
-        self.rides = input_data.rides
+        # self.get_routes()
 
     def initialise_cars(self):
         cars = []
@@ -28,6 +26,7 @@ class Process:
 
     def run(self):
         self.initialise_cars()
+        self.rides = self.input_data.rides
         sim_range = range(0, self.input_data.sim_steps)
         if not self.debug:
             sim_range = tqdm(sim_range)
@@ -41,7 +40,7 @@ class Process:
             # move any cars
             self.move_cars()
         self.debug_print('SIMULATION ENDED')
-        print('{} rides completed. {} rides left unfinished'.format(
+        print('{} rides completed. {} rides left unfinished.'.format(
             len(self.get_completed_rides()),
             len(self.rides) - len(self.get_completed_rides()))
         )
@@ -83,20 +82,15 @@ class Process:
 
     def schedule_rides(self):
         unassigned_cars = self.get_unassigned_cars()
+        self.debug_print('Scheduling {} cars'.format(len(unassigned_cars)))
         unassigned_rides = self.get_unassigned_rides()
         if len(unassigned_rides) == 0:
             return
         for car in unassigned_cars:
             # next_ride = unassigned_rides.pop(0)
-            next_ride = self.get_closest_ride_to_car(car, unassigned_rides)
+            unassigned_rides = self.get_unassigned_rides()
+            next_ride = self.get_next_ride(car, unassigned_rides, self.current_time)
             rides_for_route = [next_ride]
-            if not len(unassigned_rides) == 0:
-                closest_next_rides = self.get_next_closest_rides(next_ride, self.current_time)
-                if len(closest_next_rides) > 0:
-                    closest_next_ride = closest_next_rides[0]
-                    self.debug_print('Closest ride to {} is {}'.format(next_ride.ride_id, closest_next_ride.ride_id))
-                    unassigned_rides.pop(unassigned_rides.index(closest_next_ride))
-                    rides_for_route.append(closest_next_ride)
             route = Route(rides_for_route)
             self.debug_print('Assigned route with ride IDs {} to car: {}'.format(
                 route.get_route_ride_ids(),
@@ -127,22 +121,45 @@ class Process:
         return [car for car in self.cars if car.assigned_route is None]
 
     def get_unassigned_rides(self):
-        return [ride for ride in self.input_data.rides if ride.assigned_car == -1]
+        return [ride for ride in self.input_data.rides if ride.assigned_car is None]
+            
+    def set_next_routes(self, route, routes):
+        for t_route in routes:
+            if not t_route is route:
+                wait = t_route.ordered_rides[0].earliest_start -route.ordered_rides[-1].latest_finish
+                if wait >= 0:
+                    route.next_routes.append({'route':t_route, 'wait_time': wait})
 
-    def get_next_closest_rides(self, ride, actual_start_time):
+    def add_to_route(self, ride, next_ride, routes):
+        for route in routes:
+            start_ride = route.ordered_rides[0]
+            end_ride = route.ordered_rides[-1]
+
+            if start_ride is next_ride:
+                route.ordered_rides.insert(0, ride)
+                return routes
+            elif end_ride is ride:
+                route.ordered_rides.insert(-1, next_ride)
+                return routes
+
+        routes.append(Route([ride, next_ride]))
+        return routes
+
+    def get_next_ride(self, car, rides, actual_start_time):
         # unassigned_rides = deepcopy(self.get_unassigned_rides())
-        unassigned_rides = self.get_unassigned_rides()
-        possible_best_rides = []
-        for unassigned_ride in unassigned_rides:
-            if ride.ride_id == unassigned_ride.ride_id:
-                continue
-            distance_to_next_ride = calculate_distance(ride.row_end, unassigned_ride.row_start, ride.col_end, unassigned_ride.col_start)
-            full_distance = distance_to_next_ride + ride.distance
-            time_to_new_start = actual_start_time + full_distance
-            if time_to_new_start >= unassigned_ride.earliest_start:
-                if time_to_new_start + unassigned_ride.distance <= unassigned_ride.latest_finish:
-                    possible_best_rides.append(unassigned_ride)
-        return possible_best_rides
+        best_ride = None
+        waiting = 0 
+        for unassigned_ride in rides:
+            distance_to_next_ride = calculate_distance(car.row, unassigned_ride.row_start, car.col, unassigned_ride.col_start)
+            time_to_new_start = actual_start_time + distance_to_next_ride
+            if time_to_new_start + unassigned_ride.distance <= unassigned_ride.latest_finish:
+                temp_waiting = max(unassigned_ride.earliest_start - (time_to_new_start + unassigned_ride.distance), 0)
+                if best_ride is None or waiting > temp_waiting:
+                    waiting = temp_waiting
+                    best_ride = unassigned_ride
+                if waiting == 0:
+                    return best_ride
+        return best_ride
 
 
 if __name__ == '__main__':

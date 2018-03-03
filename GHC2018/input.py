@@ -1,6 +1,6 @@
 import os
 
-from GHC2018.models.ride import Ride
+from models.ride import Ride
 
 current_directory = os.path.dirname(os.path.realpath(__file__))
 
